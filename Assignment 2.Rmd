@@ -1,0 +1,119 @@
+---
+title: "Assignment 2"
+author: "Asish Binu Mathew"
+date: "2023-04-04"
+output: html_document
+---
+
+```{r}
+# Load required packages
+library(keras)
+library(quantmod)
+library(neuralnet)
+library(nnet)
+
+```
+
+```{r}
+set.seed(123)
+```
+
+```{r}
+getSymbols("AAPL")
+data <- as.data.frame(AAPL)
+```
+
+```{r}
+LENGTH_DATASET <- nrow(data)
+LENGTH_DATASET
+```
+
+```{r}
+# Split value in decimal
+SPLIT <- 0.8 
+```
+
+```{r}
+seeker <- as.integer(SPLIT*LENGTH_DATASET)
+seeker
+```
+
+```{r}
+# Preprocess data
+train_data <- data[1:seeker,] 
+test_data <- data[(seeker+1):nrow(data),] 
+
+x_train <- train_data[,2:ncol(data)] # use all variables except date
+x_test <- test_data[,2:ncol(data)]
+y_train <- train_data[,1] # target variable is the first column (i.e., closing price)
+y_test <- test_data[,1]
+```
+
+```{r}
+# Scale data
+x_train_scaled <- scale(x_train)
+x_test_scaled <- scale(x_test)
+y_train_scaled <- scale(y_train)
+y_test_scaled <- scale(y_test)
+```
+
+```{r}
+net <- nnet(x_train_scaled, y_train_scaled, size=10, linout=TRUE, trace=FALSE, maxit=1000)
+net
+```
+
+```{r}
+model <- keras_model_sequential() %>%
+  layer_dense(units = 128, activation = "relu", input_shape = c(5)) %>%
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 1, activation = "linear")
+
+# Compile the model
+model %>% compile(
+  loss = "mean_squared_error",
+  optimizer = optimizer_adam(),
+  metrics = list("mean_absolute_error")
+)
+```
+
+```{r}
+summary(model)
+
+```
+
+```{r}
+# Train the model
+history <- model %>% fit(
+  x = x_train_scaled,
+  y = y_train,
+  epochs = 100,
+  batch_size = 32,
+  validation_split = 0.2
+)
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+# Load data
+getSymbols("AAPL")
+price_data <- as.data.frame(AAPL)
+
+# Define input variables
+input_vars <- c("AAPL.Open", "AAPL.High", "AAPL.Low", "AAPL.Volume")
+
+# Define output variable
+output_var <- "AAPL.Close"
+
+
+# Create training and test sets
+train_set <- price_data[1:500, ]
+test_set <- price_data[501:nrow(price_data), ]
+
+
+```
